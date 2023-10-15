@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="js/codemirror.js"></script>
+    <link rel="stylesheet" href="css/codemirror.css">
+    <script src="js/javascript.js"></script>
+    <link rel="stylesheet" href="css/base16-dark.css">
+    <script src="js/matchbrackets.js"></script>
+    <script src="js/formatting.js"></script>
+
+    <style>
+		
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #menu {
+            background-color: #333;
+            height: 9.0909091vh;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #menu button {
+            flex: 1;
+            height: 100%;
+            background-color: #151515;
+            border: 4px solid #8C963B;
+            color: white;
+            cursor: pointer;
+        }
+		#menu button:hover {
+				border-color: #00ff00; /* Change border color to white on hover */
+		}
+        #bookmarks {
+            background-color: #a59c9c;
+            width: 10%;
+            height: 89.0909091vh;
+            position: fixed;
+            top: 9.0909091vh;
+            left: 0;
+            cursor: col-resize; /* Change cursor to indicate it's resizable */
+        }
+        #bookmarks button {
+            flex: 1;
+            height: 100%;
+            background-color: #151515;
+            border: 4px solid #8C963B;
+            color: white;
+            cursor: pointer;
+        }
+		#bookmarks button:hover {
+				border-color: #00ff00; /* Change border color to white on hover */
+		}
+        #text-area {
+            background-color: #eee;
+            width: 90%;
+            height: 89.0909091vh;
+            position: fixed;
+            top: 9.0909091vh;
+            left: 10%;
+        }
+          /* Style for the tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <button id="projectButton">Project</button>
+        <button id="loadButton">LoadProject</button>
+        <button id="saveButton">SaveProject</button>
+        <button id="impButton">Import</button>
+        <button id="export">Export</button>
+        <button id="keyCodeButton">keyCode</button>
+        <button id="colorPickerButton">Cpicker</button>
+        <button id="zoomInButton">Zoom In</button>
+        <button id="zoomOutButton">Zoom Out</button>
+        <button id="formatButton" >FORMAT</button>
+
+
+    </div>
+    <div id="bookmarks" style="display: flex; flex-direction: column;">
+        <!-- Add 10 buttons to the bookmarks div with event listeners -->
+        <button id = "bm1" style="flex: 1; width: 98%; ">Bookmark 1</button>
+        <button id = "bm2"  style="flex: 1; width: 98%;">Bookmark 2</button>
+        <button id = "bm3"  style="flex: 1; width: 98%;">Bookmark 3</button>
+        <button id = "bm4"  style="flex: 1; width: 98%;">Bookmark 4</button>
+        <button id = "bm5"  style="flex: 1; width: 98%;">Bookmark 5</button>
+        <button id = "bm6"  style="flex: 1; width: 98%;">Bookmark 6</button>
+        <button id = "bm7"  style="flex: 1; width: 98%;">Bookmark 7</button>
+        <button id = "bm8"  style="flex: 1; width: 98%;">Bookmark 8</button>
+        <button id = "bm9"  style="flex: 1; width: 98%;">Bookmark 9</button>
+        <button id = "bm10"  style="flex: 1; width: 98%;">Bookmark 10</button>
+    </div>
+    <div id="text-area">
+        <textarea id="codeTextArea" style="width: 100%; height: 100%;"></textarea>
+    </div>
+    <script>
+		document.title = 'WebEdit';
+        let fontSize = 14; // Initial font size
+
+        // Initialize CodeMirror
+        const codemirrorEditor = CodeMirror.fromTextArea(document.getElementById('codeTextArea'), {
+            lineNumbers: true,
+            matchBrackets: true,
+            lineWrapping: true,
+            mode: "javascript",
+            theme: "base16-dark",
+            autoRefresh: true,
+            gutter: true,
+            tabSize:4,
+            gutters: ['gut']
+        });
+        var project;
+		if(localStorage.getItem("jsProject")!=null){
+        var text= localStorage.getItem("jsProject");
+        project = JSON.parse(text);
+      }else{
+          projectSetup();
+      }
+      function loadEditor(){
+		// this loads the editor from the project variable 
+		document.getElementById("projectButton").textContent = project['pName'];
+		document.getElementById("bm1").textContent = project['bm1name'];
+		document.getElementById("bm2").textContent = project['bm2name'];
+		document.getElementById("bm3").textContent = project['bm3name'];
+		document.getElementById("bm4").textContent = project['bm4name'];
+		document.getElementById("bm5").textContent = project['bm5name'];
+		document.getElementById("bm6").textContent = project['bm6name'];
+		document.getElementById("bm7").textContent = project['bm7name'];
+		document.getElementById("bm8").textContent = project['bm8name'];
+		document.getElementById("bm9").textContent = project['bm9name'];
+		document.getElementById("bm10").textContent = project['bm10name'];
+		codemirrorEditor.setValue(project['code']);
+	 }
+	 loadEditor();
+  function projectSetup(){
+    project = {pName: 'Project',code: "/*\n             __          __ __    _______    __ __  \n\t\t\t \\ \\        / / | |   |  ____|  | (_) |  \n\t\t\t  \\ \\  /\\  / /__| |__ | |__   __| |_| |_ \n\t\t\t   \\ \\/  \\/ / _ \\ '_ \\|  __| / _` | | __|\n\t\t\t    \\  /\\  /  __/ |_) | |___| (_| | | |_ \n \t\t\t     \\/  \\/ \\___|_.__/|______\\__,_|_|\\__|\n\tA SIMPLE CODEMIRROR EDITOR FOR CREATING SINGLE HTML FILE GAMES/APPS.\n\tBUTTONS:\n\t\tProject- This is name of your project.\n        \t     Click this to run the code in a new tab.\n            \t Hold Ctrl when clicking to rename the project.\n           \t \t Name the project \"new\" to get a blank project.\n   \t\tLoadProject- This Loads Projects you have saved containing your code and bookmarks.\n                 \t Load the Help.json file to read the help file again.\n    \tSaveProject- This saves your current project.\n    \tImport- This loads a html file into your project, erasing whatever was there previously.\n    \tExport- This saves a html file of your code.\n    \tKeyCode- while your mouse is hovering over this the javascript keycode of the key being pressed  \n        \t\t is shown.\n    \tCpicker- Brings up an html color-picker.  if you have it displaying the hex color value when you\n             click back on the code editor the color hex value is put in the clipboard to be pasted.\n    \tZoom In / Zoom Out-  Changes code editor text size.\n    \tFORMAT- This attempts to pretty-up the code.\n    \tbookmark buttons-  These allow you to save the cursor position in your code.  \n                           To change the bookmark button name hold Ctrl while clicking.\n                           To set the bookmark hold Shift while clicking and it will store\n                           the current cursors location to the button.\n*/\n",bm1name: 'bookmark1',bm1line: '1',bm1ch: '1',
+		bm2name: 'bookmark2',bm2line: '1',bm2ch: '1',bm3name: 'bookmark3',bm3line: '1',bm3ch: '1',
+		bm4name: 'bookmark4',bm4line: '1',bm4ch: '1',bm5name: 'bookmark5',bm5line: '1',bm5ch: '1',
+		bm6name: 'bookmark6',bm6line: '1',bm6ch: '1',bm7name: 'bookmark7',bm7line: '1',bm7ch: '1',
+		bm8name: 'bookmark8',bm8line: '1',bm8ch: '1',bm9name: 'bookmark9',bm9line: '1',bm9ch: '1',
+		bm10name: 'bookmark10',bm10line: '1',bm10ch: '1',
+		};
+	}
+        codemirrorEditor.on("change", function (cm, change) {
+            
+            project['code'] = codemirrorEditor.getValue();
+            localStorage.setItem("jsProject", JSON.stringify(project));
+        });
+
+        codemirrorEditor.on("cursorActivity", function () {
+            logCursorPosition();
+        });
+
+        function logCursorPosition() {
+            const cursor = codemirrorEditor.getCursor();
+            console.log("Cursor Position - Line: " + (cursor.line + 1) + ", Ch: " + cursor.ch);
+            localStorage.setItem("cursorLn", cursor.line);
+            localStorage.setItem("cursorCh", cursor.ch);
+        }
+        function bmarkHandler(bid){
+			
+		}
+        function bmarkset(bid){
+            localStorage.setItem("bm"+bid+"_line", localStorage.getItem("cursorLn"));
+       	}
+       	function bmarkuse(bid){
+			if(localStorage.getItem("bm"+bid+"_line") != null){
+			var line = localStorage.getItem("bm"+bid+"_line");
+			codemirrorEditor.setCursor({ line: line, ch: 0 });
+			
+		}
+		}
+        function zoomIn() {
+            fontSize += 1;
+            if (fontSize < 10) {
+                fontSize = 10;
+            }
+            codemirrorEditor.getWrapperElement().style.fontSize = fontSize + "px";
+        }
+
+        function zoomOut() {
+            fontSize -= 1;
+            if (fontSize < 10) {
+                fontSize = 10;
+            }
+            codemirrorEditor.getWrapperElement().style.fontSize = fontSize + "px";
+        }
+
+        document.getElementById("zoomInButton").addEventListener("click", zoomIn);
+        document.getElementById("zoomOutButton").addEventListener("click", zoomOut);
+
+        function resizeCodeMirror() {
+            codemirrorEditor.setSize("100%", "100%");
+        }
+
+        window.addEventListener("resize", resizeCodeMirror);
+        resizeCodeMirror();
+
+        var gotFocus = false;
+
+        function handleFocus() {
+            if (gotFocus == false) {
+                gotFocus = true;
+                codemirrorEditor.focus();
+                var ln = localStorage.getItem("cursorLn");
+                var ch = localStorage.getItem("cursorCh");
+                codemirrorEditor.setCursor({ line: ln, ch: ch });
+               codemirrorEditor.scrollIntoView({  line: ln, ch: ch }, 100); // Adjust the duration (e.g., 100ms) if needed
+
+            }
+        }
+
+        window.addEventListener("focus", handleFocus);
+
+        const resizableDiv = document.getElementById('bookmarks');
+        const resizableTarea = document.getElementById('text-area');
+        let isResizing = false;
+
+        resizableDiv.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            const initialX = e.clientX;
+            const originalWidth = parseFloat(getComputedStyle(resizableDiv, null).getPropertyValue('width'));
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const currentX = e.clientX;
+                const width = originalWidth + (currentX - initialX);
+                resizableDiv.style.width = `${width}px`;
+                const windowWidth = window.innerWidth;
+                const remainingWidth = windowWidth - width;
+                resizableTarea.style.left = `${width}px`;
+                resizableTarea.style.width = `${remainingWidth}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isResizing = false;
+            });
+        });
+
+        document.getElementById("impButton").addEventListener("click", function () {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.html';
+
+            fileInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function () {
+						projectSetup();
+						project['code']=reader.result;
+                        loadEditor()
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            fileInput.click();
+        });
+
+        document.getElementById("loadButton").addEventListener("click", function () {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+
+            fileInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        project = JSON.parse(reader.result);
+                        loadEditor();
+                    };
+                    reader.readAsText(file);
+                }
+                
+            });
+
+            fileInput.click();
+        });
+
+        document.getElementById("saveButton").addEventListener("click", function () {
+            const jsonContent = JSON.stringify(project, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = project['pName']+'.json'; // Specify the filename
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+        
+        });
+                document.getElementById("export").addEventListener("click", function () {
+            const code = codemirrorEditor.getValue();
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'saved.html';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+
+            a.click();
+
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        });
+
+        const keyCodeButton = document.getElementById("keyCodeButton");
+        keyCodeButton.addEventListener("mouseenter", function () {
+            document.addEventListener("keydown", function (event) {
+                keyCodeButton.innerText = `Key Code: ${event.keyCode}`;
+            });
+        });
+
+        keyCodeButton.addEventListener("mouseleave", function () {
+            keyCodeButton.innerText = "keyCode";
+        });
+
+        var newString;
+
+        document.getElementById("projectButton").addEventListener("click", function () {
+            if (isCtrlPressed==false) {
+            const code = codemirrorEditor.getValue();
+            var eCatch =  "\nvar msg='';\nvar sourceCode='';\nvar lines;\nvar lineOffset= 0;\nvar done = false;\nwindow.onerror = function(message, source, lineno, colno, error) {\n  \n  sourceCode = localStorage.getItem('code')\n  lines = sourceCode.split('\\n');\n  for(i=0;i<lines.length;i++){\n    if (lines[i].indexOf(\"<script>\") !== -1 && done==false) { // checks if string contains <string\n      done = true;\n      lineOffset = i;\n    }\n    \n  }\n  msg = message+' , line :'+ (lineno+lineOffset-24)+' , column: ' +colno;\n      localStorage.setItem(\"cursorLn\",(lineno+lineOffset)-25 );\n     localStorage.setItem(\"cursorCh\",colno-1);\n  alert(msg);\n  window.close();\n}\n"
+            var position = code.indexOf("<script>");
+            var mainArray = code.split('');
+            mainArray.splice(position+8, 0, eCatch);
+            newString = mainArray.join('');
+            const newTab = window.open();
+            newTab.document.open();
+            newTab.document.write('<pre>' + newString + '</pre>');
+            newTab.document.close();
+            gotFocus=false
+		}else { // renames the project button
+				const newButtonText = prompt('Enter a new string for this bookmark button:', document.getElementById("projectButton").textContent);
+				if (newButtonText !== null) {
+					document.getElementById("projectButton").textContent = newButtonText;
+					project['pName']=newButtonText;
+					
+                     if(newButtonText=="new"){
+					     projectSetup();
+					 	 loadEditor();
+				    }
+				}
+				isCtrlPressed=false
+				
+				codemirrorEditor.focus();
+			}
+        });
+
+        const colorPickerButton = document.getElementById("colorPickerButton");
+        colorPickerButton.addEventListener("click", function () {
+            const colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.addEventListener("change", function () {
+                const selectedColor = colorPicker.value;
+                navigator.clipboard.writeText(selectedColor);
+            });
+            colorPicker.click();
+        });
+
+        // Add an event listener for when the control key is pressed
+        let isCtrlPressed = false;
+       let isShftPressed = false;
+        document.addEventListener('keydown', function (event) {
+			//shiftKey
+            if (event.ctrlKey || event.metaKey) {
+                isCtrlPressed = true;
+            }
+            if (event.shiftKey || event.metaKey) {
+                isShftPressed = true;
+            }
+        });
+
+        // Add an event listener for when the control key is released
+        document.addEventListener('keyup', function (event) {
+            if (event.ctrlKey || event.metaKey) {
+                isCtrlPressed = false;
+            }
+            if (event.shiftKey || event.metaKey) {
+                isShftPressed = false;
+            }
+        });
+
+        // Add event listeners to the bookmark buttons
+        const bookmarkButtons = document.querySelectorAll('#bookmarks button');
+        bookmarkButtons.forEach((button, index) => {
+            button.addEventListener('click', function () {
+			if(isCtrlPressed==false && isShftPressed==false){
+  					codemirrorEditor.focus();
+					codemirrorEditor.setCursor({ line: project[this.id+'line'], ch: project[this.id+'ch'] });
+				}
+                if (isCtrlPressed) { // renames the bookmark button
+                    const newButtonText = prompt('Enter a new string for this bookmark button:', button.textContent);
+                    if (newButtonText !== null) {
+                        button.textContent = newButtonText; 
+                        project[this.id+'name'] = newButtonText;
+                        localStorage.setItem("jsProject", JSON.stringify(project));
+                    }
+                    isCtrlPressed=false
+                    codemirrorEditor.focus();
+                }
+               if (isShftPressed) { // sets the bookmark line
+				   var cursor = codemirrorEditor.getCursor();
+				    project[this.id+'line'] = cursor.line;
+                    project[this.id+'ch'] = cursor.ch;
+                    localStorage.setItem("jsProject", JSON.stringify(project));
+					 codemirrorEditor.focus();
+                    isShftPressed=false
+                }
+
+            });
+        });
+        
+        //formatButton
+          const fmat = document.getElementById('formatButton');
+          document.getElementById("formatButton").addEventListener("click", autoFormatSelection);
+    // this formats code
+  function autoFormatSelection() {
+ // Split the code into lines
+  const lines =  project['code'] .split('\n');
+  // Initialize the formatted code
+  let formattedCode = '';
+    // Define the indentation size (e.g., 2 spaces)
+  const indentSize = 4;
+    // Initialize the current indentation level
+  let currentIndent = 0;
+    // Regular expression to match open and close braces
+  const openBraceRegex = /{\s*$/;
+  const closeBraceRegex = /^}/;
+   // Loop through each line of the input code
+  for (let line of lines) {
+    line = line.trim(); // Trim leading and trailing white space
+   // Decrease the current indentation level if a closing brace is found
+    if (closeBraceRegex.test(line)) {
+      currentIndent -= indentSize;
+    }
+   // Add the current line with proper indentation to the formatted code
+    formattedCode += ' '.repeat(currentIndent) + line + '\n';
+   // Increase the current indentation level if an open brace is found
+    if (openBraceRegex.test(line)) {
+      currentIndent += indentSize;
+    }
+  }
+  project['code']=formattedCode;
+  codemirrorEditor.setValue(project['code']);
+  }
+
+    </script>
+</body>
+</html>
